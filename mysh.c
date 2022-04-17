@@ -9,16 +9,23 @@
 #include <unistd.h>
 #include <signal.h>
 #include "mysh.h"
+#include <string.h>
 
 #define	DFL_PROMPT	"LindbergSh~> "
+#define MEMORY 1028
+
+char *prompt[MEMORY];
+char *workingDir[MEMORY]; 
 
 int main()
 {
-  char	*cmdline, *prompt, **arglist;
+  char	*cmdline, **arglist;
   int	result;
   void	setup();
+  
+  //print prompt
+  prettyPrint();
 
-  prompt = DFL_PROMPT ;
   setup();
 
   while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
@@ -27,8 +34,18 @@ int main()
       freelist(arglist);
     }
     free(cmdline);
+    //reprint prompt
+    prettyPrint();
   }
   return 0;
+}
+
+void prettyPrint(){
+  prompt[0] = '\0';
+    strcat(prompt, DFL_PROMPT);
+    getcwd(workingDir, MEMORY);
+    strcat(prompt, workingDir);
+    strcat(prompt, " $ ");
 }
 
 void setup()
