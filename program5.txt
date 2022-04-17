@@ -1,0 +1,231 @@
+Name: Daneil Lindberg
+
+bugs: if you are typing when a background process ends it just prints over what youre typing. This is because I run the wait pid in a different thread and it
+just prints without waiting for the user to finish typing or the next input.
+
+----execute.c------------------------------------------------------------------------------
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include "stdbool.h"
+#include <pthread.h>
+
+void *printWhenDie(int cPid, void *vargp);
+
+int execute(char *argv[])
+{
+
+  int	pid;
+  int	child_info = -1;
+  int lastindex = 0;
+  bool bg_flag = false;
+  
+
+  if (argv[0] == NULL )		/* nothing succeeds	*/
+    return 0;
+  else if (strcmp(argv[0], "exit") == 0 ) //user types exit
+    if (argv[1] == NULL)
+      exit(0);
+    else
+      exit(atoi(argv[1])); //exit with a number
+  else if (strcmp(argv[0], "cd") == 0 ) {//user types cd
+    if (argv[1] == NULL)
+      chdir(getenv("HOME"));//go to home directory
+    else {
+      if (chdir(argv[1]) == -1 ) { //if cd fails
+        fprintf(stderr, "cd: %s: No such file or directory\n", argv[1]);
+        return -1;
+      }
+    }
+    return 0;
+  }
+
+  //get the length of argv using argc gives segfault :(
+  for (;argv[lastindex+1] != NULL; lastindex++);
+  
+  // Looks for background flag, removes from argv if existing and set bg_flag to true
+  if (strcmp(argv[lastindex], "&") == 0) {
+    bg_flag = true;
+    argv[lastindex] = NULL;
+  }
+
+  if ((pid = fork())  == -1 )
+    fprintf(stderr, "fork: failed\n");
+  else if ( pid == 0 ) {
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
+    execvp(argv[0], argv);
+    fprintf(stderr, "cmd: %s: Command not found\n", argv[0]);
+    exit(1);
+  }
+  else {
+    //if flag is present run in background
+    if (bg_flag) {
+      pthread_t thread_id;
+      printf("Process %d started in background.\n", pid);
+      // Creates thread to print out when process dies
+      pthread_create(&thread_id, NULL, printWhenDie, (void *)pid);
+
+    } else { //else just wait for process to finish
+      if (waitpid(pid, &child_info, 0) == -1){
+        fprintf(stderr, "wait");
+      }
+    }
+  }
+  return child_info;
+}
+
+void *printWhenDie(int cPid, void *vargp) {
+  int status;
+  sleep(1);
+  //wait for process with cPid to end
+  while (waitpid(cPid, &status, WNOHANG) == 0) {
+    //do nothing
+  }
+  //if process has ended, print out the process id
+  printf("Process %d ended. \n", cPid);
+}
+
+----mysh.c--------------------------------------------------------------------------------
+
+/**  started from smsh1.c  small-shell version 1
+ **		first really useful version after prompting shell
+ **		this one parses the command line into strings
+ **		uses fork, exec, wait, and ignores signals
+ **/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include "mysh.h"
+#include <string.h>
+
+#define	DFL_PROMPT	"LindbergSh~> "
+#define MEMORY 1028
+
+char *prompt[MEMORY];
+char *workingDir[MEMORY]; 
+
+int main()
+{
+  char	*cmdline, **arglist;
+  int	result;
+  void	setup();
+  
+  //print prompt
+  prettyPrint();
+
+  setup();
+
+  while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
+    if ( (arglist = splitline(cmdline)) != NULL  ){
+      result = execute(arglist);
+      freelist(arglist);
+    }
+    free(cmdline);
+    //reprint prompt
+    prettyPrint();
+  }
+  return 0;
+}
+
+void prettyPrint(){
+  prompt[0] = '\0';
+    strcat(prompt, DFL_PROMPT);
+    getcwd(workingDir, MEMORY);
+    strcat(prompt, workingDir);
+    strcat(prompt, " $ ");
+}
+
+void setup()
+/*
+ * purpose: initialize shell
+ * returns: nothing. calls fatal() if trouble
+ */
+{
+  signal(SIGINT,  SIG_IGN);
+  signal(SIGQUIT, SIG_IGN);
+}
+
+void fatal(char *s1, char *s2, int n)
+{
+  fprintf(stderr,"Error: %s,%s\n", s1, s2);
+  exit(n);
+}
+
+---MAKEFILE--------------------------------------------------------------------------------
+#
+# makefile for smsh
+#
+CC=gcc
+CFLAGS=-g
+
+mysh: mysh.o splitline.o execute.o
+	$(CC) $(CFLAGS) -pthread -o mysh mysh.o splitline.o execute.o
+
+clean:
+	rm -f *.o
+
+
+---TYPESCRIPT--------------------------------------------------------------------------------
+
+Script started on 2022-04-17 13:17:43-04:00 [TERM="xterm-256color" TTY="/dev/pts/4" COLUMNS="211" LINES="11"]
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ ./mysh
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ ls
+Makefile  execute.c  mysh  mysh.c  mysh.h  prog5_mysh.pdf  splitline.c  typescript
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ date
+Sun Apr 17 13:17:52 EDT 2022
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ bogus
+cmd: bogus: Command not found
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ exit
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ ./mysh
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ exit 7
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ echo $?
+7
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ ./mysh
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ pwd
+/home/dan/class/350/programs/350Prog5
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ cd ..
+LindbergSh~> /home/dan/class/350/programs $ pwd
+/home/dan/class/350/programs
+LindbergSh~> /home/dan/class/350/programs $ cd /usr/bin
+LindbergSh~> /usr/bin $ pwd
+/usr/bin
+LindbergSh~> /usr/bin $ cd bogus
+cd: bogus: No such file or directory
+LindbergSh~> /usr/bin $ pwd
+/usr/bin
+LindbergSh~> /usr/bin $ cd
+LindbergSh~> /home/dan $ pwd
+/home/dan
+LindbergSh~> /home/dan $ sleep 10 &
+
+Process 7740 started in background.
+LindbergSh~> /home/dan $ ps -l
+F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+0 S  1000  7354  7353  0  80   0 -  2502 do_wai pts/9    00:00:00 bash
+0 S  1000  7524  7354  2  80   0 -  2714 do_wai pts/9    00:00:01 mysh
+0 S  1000  7740  7524  0  80   0 -  1808 hrtime pts/9    00:00:00 sleep
+0 R  1000  7742  7524  0  80   0 -  2634 -      pts/9    00:00:00 ps
+LindbergSh~> /home/dan $ Process 7740 ended.
+
+LindbergSh~> /home/dan $ ps -l
+F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+0 S  1000  7354  7353  0  80   0 -  2502 do_wai pts/9    00:00:00 bash
+0 S  1000  7524  7354 14  80   0 -  2714 do_wai pts/9    00:00:09 mysh
+0 R  1000  7812  7524  0  80   0 -  2634 -      pts/9    00:00:00 ps
+LindbergSh~> /home/dan $ ps -l
+F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+0 S  1000  7354  7353  0  80   0 -  2502 do_wai pts/9    00:00:00 bash
+0 S  1000  7524  7354 13  80   0 -  2714 do_wai pts/9    00:00:09 mysh
+0 R  1000  7855  7524  0  80   0 -  2634 -      pts/9    00:00:00 ps
+LindbergSh~> /home/dan $ exit
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ exit
+exit
+
+Script done on 2022-04-17 13:19:33-04:00 [COMMAND_EXIT_CODE="0"]

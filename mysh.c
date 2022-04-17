@@ -12,7 +12,7 @@
 #include <string.h>
 
 #define	DFL_PROMPT	"LindbergSh~> "
-#define MEMORY 1028
+#define MEMORY 1024
 
 char *prompt[MEMORY];
 char *workingDir[MEMORY]; 
@@ -42,10 +42,10 @@ int main()
 
 void prettyPrint(){
   prompt[0] = '\0';
-    strcat(prompt, DFL_PROMPT);
-    getcwd(workingDir, MEMORY);
-    strcat(prompt, workingDir);
-    strcat(prompt, " $ ");
+  strcat(prompt, DFL_PROMPT);
+  getcwd(workingDir, MEMORY);
+  strcat(prompt, workingDir);
+  strcat(prompt, " $ ");
 }
 
 void setup()

@@ -1,5 +1,3 @@
-/* execute.c - code used by small shell to execute commands */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +15,7 @@ int execute(char *argv[])
   int	pid;
   int	child_info = -1;
   int lastindex = 0;
-  bool bg_flag = false;
+  bool isBackground = false;
   
 
   if (argv[0] == NULL )		/* nothing succeeds	*/
@@ -42,9 +40,9 @@ int execute(char *argv[])
   //get the length of argv using argc gives segfault :(
   for (;argv[lastindex+1] != NULL; lastindex++);
   
-  // Looks for background flag, removes from argv if existing and set bg_flag to true
+  // Looks for background flag at last index of argV, removes from argv if existing and set isBackground to true
   if (strcmp(argv[lastindex], "&") == 0) {
-    bg_flag = true;
+    isBackground = true;
     argv[lastindex] = NULL;
   }
 
@@ -58,16 +56,16 @@ int execute(char *argv[])
     exit(1);
   }
   else {
-    //if flag is present run in background
-    if (bg_flag) {
+    //if its got a background flag, then we dont wait for it to finish
+    if (isBackground) {
       pthread_t thread_id;
       printf("Process %d started in background.\n", pid);
-      // Creates thread to print out when process dies
+      // Creates thread to print out when process dies i couldnt figure a way to do it and make the shell no print funny
       pthread_create(&thread_id, NULL, printWhenDie, (void *)pid);
 
     } else { //else just wait for process to finish
       if (waitpid(pid, &child_info, 0) == -1){
-        fprintf(stderr, "wait");
+        fprintf(stderr, "Process %d: waitpid: failed\n", pid);
       }
     }
   }

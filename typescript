@@ -1,17 +1,17 @@
 Script started on 2022-04-17 13:17:43-04:00 [TERM="xterm-256color" TTY="/dev/pts/4" COLUMNS="211" LINES="11"]
-]0;dan@DESKTOP-N9EDQF7: ~/class/350/programs/350Prog5[01;32mdan@DESKTOP-N9EDQF7[00m:[01;34m~/class/350/programs/350Prog5[00m$ ./mysh
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ ./mysh
 LindbergSh~> /home/dan/class/350/programs/350Prog5 $ ls
-Makefile  execute.c  mysh  mysh.c  mysh.h  prog5_mysh.pdf  splitline.c	typescript
+Makefile  execute.c  mysh  mysh.c  mysh.h  prog5_mysh.pdf  splitline.c  typescript
 LindbergSh~> /home/dan/class/350/programs/350Prog5 $ date
 Sun Apr 17 13:17:52 EDT 2022
-LindbergSh~> /home/dan/class/350/programs/350Prog5 $ bodu  gus
+LindbergSh~> /home/dan/class/350/programs/350Prog5 $ bogus
 cmd: bogus: Command not found
 LindbergSh~> /home/dan/class/350/programs/350Prog5 $ exit
-]0;dan@DESKTOP-N9EDQF7: ~/class/350/programs/350Prog5[01;32mdan@DESKTOP-N9EDQF7[00m:[01;34m~/class/350/programs/350Prog5[00m$ ./mysh
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ ./mysh
 LindbergSh~> /home/dan/class/350/programs/350Prog5 $ exit 7
-]0;dan@DESKTOP-N9EDQF7: ~/class/350/programs/350Prog5[01;32mdan@DESKTOP-N9EDQF7[00m:[01;34m~/class/350/programs/350Prog5[00m$ echo $?
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ echo $?
 7
-]0;dan@DESKTOP-N9EDQF7: ~/class/350/programs/350Prog5[01;32mdan@DESKTOP-N9EDQF7[00m:[01;34m~/class/350/programs/350Prog5[00m$ ./myt[Ksh
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ ./mysh
 LindbergSh~> /home/dan/class/350/programs/350Prog5 $ pwd
 /home/dan/class/350/programs/350Prog5
 LindbergSh~> /home/dan/class/350/programs/350Prog5 $ cd ..
@@ -28,14 +28,15 @@ LindbergSh~> /usr/bin $ cd
 LindbergSh~> /home/dan $ pwd
 /home/dan
 LindbergSh~> /home/dan $ sleep 10 &
+
 Process 7740 started in background.
-LindbergSh~> /home/dan $ ps-  -l
+LindbergSh~> /home/dan $ ps -l
 F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
 0 S  1000  7354  7353  0  80   0 -  2502 do_wai pts/9    00:00:00 bash
 0 S  1000  7524  7354  2  80   0 -  2714 do_wai pts/9    00:00:01 mysh
 0 S  1000  7740  7524  0  80   0 -  1808 hrtime pts/9    00:00:00 sleep
 0 R  1000  7742  7524  0  80   0 -  2634 -      pts/9    00:00:00 ps
-LindbergSh~> /home/dan $ Process 7740 ended. 
+LindbergSh~> /home/dan $ Process 7740 ended.
 
 LindbergSh~> /home/dan $ ps -l
 F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
@@ -48,7 +49,7 @@ F S   UID   PID  PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
 0 S  1000  7524  7354 13  80   0 -  2714 do_wai pts/9    00:00:09 mysh
 0 R  1000  7855  7524  0  80   0 -  2634 -      pts/9    00:00:00 ps
 LindbergSh~> /home/dan $ exit
-]0;dan@DESKTOP-N9EDQF7: ~/class/350/programs/350Prog5[01;32mdan@DESKTOP-N9EDQF7[00m:[01;34m~/class/350/programs/350Prog5[00m$ exit
+dan@DESKTOP-N9EDQF7:~/class/350/programs/350Prog5$ exit
 exit
 
 Script done on 2022-04-17 13:19:33-04:00 [COMMAND_EXIT_CODE="0"]
